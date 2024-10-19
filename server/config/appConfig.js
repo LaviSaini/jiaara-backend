@@ -1,4 +1,4 @@
 let appConfig = {
-    PORT: process.env.DBPORT
+    PORT: process.env.SERVER
 };
 module.exports = appConfig
