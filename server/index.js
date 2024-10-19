@@ -54,9 +54,5 @@ app.use(function (req, res, next) {
 
 app.use(response.success, response.reject);
 app.use(express.json({ limit: "500mb" }));
-<<<<<<< Updated upstream
-app.use(express.urlencoded({ limit: "500mb", extended: false }));
-=======
 app.use(express.urlencoded({ limit: "500mb", extended: false }));
 app.use('/api/v1', v1)
->>>>>>> Stashed changes
