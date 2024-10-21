@@ -1,24 +1,28 @@
+const Sequelize = require('sequelize');
 
-const mysql = require('mysql2');
-// const mongoose = require('mongoose');
+const isDev = process.env.NODE_ENV === 'development';
+const configs = require(`./config`);
+const configuration = isDev ? configs.development : configs.production;
+console.log(`${isDev ? "Using Development Database" : "Using Production Database"}`)
 
-// MySQL connection
-const MYSQLConnection = mysql.createConnection({
-    host: process.env.DBHOST,
-    user: process.env.DBUSER,
-    password: process.env.DBPASSWORD,
-    database: process.env.DBNAME,
-    // port: 3306
-});
+let database;
 
-// Connect to MySQL
-MYSQLConnection.connect(err => {
-    if (err) {
-        console.error('Error connecting to MySQL:', err.stack);
-    } else {
-        console.log('Connected to MySQL');
-    }
-});
-module.exports = MYSQLConnection
-
-
+console.info('NODE_ENV:', process.env.NODE_ENV || 'development');
+switch (process.env.NODE_ENV || 'development') {
+    default: database = new Sequelize(
+        configuration.database,
+        configuration.user,
+        configuration.password, {
+        host: configuration.db_host,
+        port: configuration.db_port,
+        dialect: configuration.dialect,
+        pool: {
+            max: 5,
+            min: 0,
+            idle: 10000,
+        },
+        logging: false
+    },
+    );
+}
+module.exports = database;
