@@ -22,6 +22,12 @@ const forgotPassword = Joi.object({
     token: Joi.string().required(),
     password: Joi.string().required()
 })
+const generateNewAccessToken = Joi.object({
+    token: Joi.string().required()
+})
+const customGoogleLogin = Joi.object({
+    googleToken: Joi.string().required()
+})
 module.exports = {
     userSignUp: (req, res, next) => {
         const { error } = userSignUp.validate(req.body);
@@ -53,6 +59,20 @@ module.exports = {
     },
     forgotPassword: (req, res, next) => {
         const { error } = forgotPassword.validate(req.body);
+        if (error) {
+            return res.status(CONFIG.ERROR_CODE_BAD_REQUEST).json({ message: error.details[0].message })
+        }
+        next()
+    },
+    generateNewAccessToken: (req, res, next) => {
+        const { error } = generateNewAccessToken.validate(req.body);
+        if (error) {
+            return res.status(CONFIG.ERROR_CODE_BAD_REQUEST).json({ message: error.details[0].message })
+        }
+        next();
+    },
+    customGoogleLogin: (req, res, next) => {
+        const { error } = customGoogleLogin.validate(req.body);
         if (error) {
             return res.status(CONFIG.ERROR_CODE_BAD_REQUEST).json({ message: error.details[0].message })
         }

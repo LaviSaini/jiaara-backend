@@ -1,11 +1,11 @@
 const { request } = require("http");
 const CONFIG = require('../../utils/appConfig');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const userService = require("../service/authQuery");
 const BycrpytService = require('../service/bycrpty.service')
 const jwtService = require('../service/jwt.service');
 const sendEmail = require("../../utils/nodemailer");
+const jwt = require('jsonwebtoken');
 const authController = {
     async googleLoginSuccess(req, res) {
         const body = req.user;
@@ -14,7 +14,7 @@ const authController = {
     },
     async signUp(req, res) {
         try {
-            const { first_name, last_name, email, password } = req.body;
+            const { first_name, last_name, email, password, googleToken } = req.body;
             const userCheck = await userService().getUserByEmail(email);
             if (userCheck) {
                 return res.reject(CONFIG.SUCCESS_CODE, CONFIG.EMAIL_ALREADY_EXISTS);
@@ -35,10 +35,13 @@ const authController = {
                         lastName: last_name,
                         id: userCreated.user_id,
                         email: email,
-                        token: ''
+                        accessToken: '',
+                        refreshToken: ''
                     }
                     const token = await jwtService.issueJwtToken(jwtObj)
-                    jwtObj.token = token
+                    const refreshToken = await jwtService.issueJwtRefreshToken(jwtObj);
+                    jwtObj.accessToken = token;
+                    jwtObj.refreshToken = refreshToken
                     return res.success(CONFIG.SUCCESS_CODE, CONFIG.USER_CREATED_SUCCESSFULLY, jwtObj);
                 } else {
                     return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.ERROR_WHILE_CREATING_USER)
@@ -51,6 +54,19 @@ const authController = {
             return res.reject(error.code, error.message)
         }
     },
+    async customGoogleLogin(req, res) {
+        const { googleToken } = req.body;
+        console.log(googleToken)
+        const data = jwt.decode(googleToken, { complete: true });
+        console.log(data)
+    },
+    /**
+ * @api {post} /api/v1/auth/login LogIn User
+ * @apiName LogIn User
+ * @apiGroup Users
+ * @apiDescription User Service...
+
+ */
     async login(req, res) {
         try {
             const { email, password } = req.body
@@ -61,11 +77,13 @@ const authController = {
                     const obj = {
                         firstName: userExist.first_name,
                         lastName: userExist.last_name,
-                        userId: userExist.user_id,
+                        id: userExist.user_id,
                         email: userExist.email,
                     }
                     const jwtToken = await jwtService.issueJwtToken(obj);
-                    return res.success(CONFIG.SUCCESS_CODE, CONFIG.USER_FOUND, { token: jwtToken })
+                    const refreshToken = await jwtService.issueJwtRefreshToken(obj);
+
+                    return res.success(CONFIG.SUCCESS_CODE, CONFIG.USER_FOUND, { token: jwtToken, refreshToken: refreshToken })
                 } else {
                     return res.reject(CONFIG.SUCCESS_CODE, CONFIG.PASSWORD_INCORRECT)
                 }
@@ -155,6 +173,27 @@ const authController = {
             }
         } catch (error) {
             return res.reject(error.code, error.message)
+        }
+    },
+    async generateNewAccessToken(req, res) {
+        const { token } = req.body;
+        try {
+            const isTokenValid = await jwtService.verifyJwtRefreshToken(token);
+            console.log(isTokenValid)
+            const obj = {
+                firstName: isTokenValid.firstName,
+                lastName: isTokenValid.lastName,
+                id: isTokenValid.userId,
+                email: isTokenValid.email,
+            }
+            const accessToken = await jwtService.issueJwtToken(obj);
+            return res.success(CONFIG.SUCCESS_CODE, { token: accessToken })
+        } catch (error) {
+            if (error instanceof jwt.TokenExpiredError) {
+                return res.reject(CONFIG.ERROR_CODE_UNAUTHORIZED, CONFIG.TOKEN_EXPIRED)
+            } else {
+                return res.reject(CONFIG.ERROR_CODE_UNAUTHORIZED, CONFIG.INVALID_TOKEN)
+            }
         }
     }
 

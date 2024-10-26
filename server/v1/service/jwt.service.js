@@ -7,7 +7,14 @@ module.exports = {
     },
     async verifyJwtToken(token, cb) {
         return jwt.verify(token, process.env.JWT_SECRET, cb);
+    },
+    async issueJwtRefreshToken(payload) {
+        return jwt.sign(payload, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRE })
+    },
+    async verifyJwtRefreshToken(token, cb) {
+        return jwt.verify(token, process.env.JWT_REFRESH_TOKEN_SECRET, cb);
     }
+
 }
 
 

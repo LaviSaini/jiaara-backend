@@ -13,6 +13,7 @@ require('./utils/passport')
 const config = require('./config');
 
 const dbService = require("./v1/service/db.service")
+app.use('/apidoc', express.static(path.join(__dirname, '../apidoc/doc')));
 
 const DB = dbService('development', config.migrate).start();
 // Middleware

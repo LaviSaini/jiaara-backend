@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require('passport')
 const AuthController = require('../controller/authController');
-const { userSignUp, userLogin, resetPassword, sendResetPasswordMail, forgotPassword } = require("../validators/userValidation");
+const { userSignUp, userLogin, resetPassword, sendResetPasswordMail, forgotPassword, generateNewAccessToken, customGoogleLogin } = require("../validators/userValidation");
 // router.get('/google-login', AuthController.googleLogin)
 router.get('/auth/google', passport.authenticate('google', { scope: ['email', 'profile'] }))
 router.get('/auth/google/callback', passport.authenticate('google', { successRedirect: '/api/v1/auth/success', failureRedirect: '/failure' }))
@@ -13,4 +13,6 @@ router.post('/login', userLogin, AuthController.login)
 router.post('/reset-password', resetPassword, AuthController.resetPassword)
 router.post('/send-reset-password-mail', sendResetPasswordMail, AuthController.sendResetPasswordEmail)
 router.post('/forget-password', forgotPassword, AuthController.forgotPassword)
+router.post('/generate-new-access-token', generateNewAccessToken, AuthController.generateNewAccessToken)
+router.post('/google-login', customGoogleLogin, AuthController.customGoogleLogin)
 module.exports = router
