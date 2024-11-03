@@ -1,4 +1,4 @@
-const cartService = require('../services/cartService');
+const cartService = require('../service/cartServices');
 
 // Add item to cart
 exports.addItem = async (req, res) => {

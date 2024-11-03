@@ -15,7 +15,7 @@ switch (process.env.NODE_ENV || 'development') {
         configuration.password, {
         host: configuration.db_host,
         port: configuration.db_port,
-        dialect: configuration.dialect,
+        dialect: 'mysql',
         pool: {
             max: 5,
             min: 0,

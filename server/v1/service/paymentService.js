@@ -1,5 +1,6 @@
 const razorpay = require('../razorpayConfig'); // Import Razorpay configuration
-const db = require('../db'); // Import database connection
+const Models = require('../models')
+const paymentModel = Models.paymnents
 
 const paymentService = {
     async createOrder(amount, currency, userId, productId) {
@@ -23,7 +24,7 @@ const paymentService = {
         };
 
         return new Promise((resolve, reject) => {
-            db.query('INSERT INTO payments SET ?', paymentData, (err, results) => {
+            paymentModel.query('INSERT INTO payments SET ?', paymentData, (err, results) => {
                 if (err) return reject(err);
                 resolve({ order, results });
             });
