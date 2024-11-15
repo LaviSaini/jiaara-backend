@@ -6,14 +6,11 @@ const BycrpytService = require("../service/bycrpty.service");
 const jwtService = require("../service/jwt.service");
 const sendEmail = require("../../utils/nodemailer");
 const jwt = require("jsonwebtoken");
+const generateCustomPassword = require('../../utils/passwordGenerator')
 const authController = {
-  async googleLoginSuccess(req, res) {
-    const body = req.user;
-  },
-  async googleLoginFail(req, res) {},
   async signUp(req, res) {
     try {
-      const { first_name, last_name, email, password, googleToken } = req.body;
+      const { first_name, last_name, email, password } = req.body;
       const userCheck = await userService().getUserByEmail(email);
       if (userCheck) {
         return res.reject(CONFIG.SUCCESS_CODE, CONFIG.EMAIL_ALREADY_EXISTS);
@@ -63,10 +60,66 @@ const authController = {
     }
   },
   async customGoogleLogin(req, res) {
-    const { googleToken } = req.body;
-    console.log(googleToken);
-    const data = jwt.decode(googleToken, { complete: true });
-    console.log(data);
+    const { token } = req.body;
+    const isTokenValid = await jwtService.decodeToken(token)
+    if (isTokenValid) {
+      const userCheck = await userService().getUserByEmail(isTokenValid.email);
+      if (userCheck) {
+        const jwtObj = {
+          firstName: userCheck.first_name,
+          lastName: userCheck.last_name,
+          id: userCheck.user_id,
+          email: userCheck.email,
+          accessToken: "",
+          refreshToken: "",
+        }
+        const token = await jwtService.issueJwtToken(jwtObj);
+        const refreshToken = await jwtService.issueJwtRefreshToken(jwtObj);
+        jwtObj.accessToken = token;
+        jwtObj.refreshToken = refreshToken;
+        return res.success(
+          CONFIG.SUCCESS_CODE,
+          CONFIG.USER_FOUND, {
+          token: token,
+          refreshToken: refreshToken,
+        }
+        );
+      } else {
+        const hashedPassword = await BycrpytService.generatePassword(generateCustomPassword(10));
+
+        const requestObject = {
+          first_name: isTokenValid.given_name,
+          last_name: isTokenValid.family_name,
+          email: isTokenValid.email,
+          password: hashedPassword
+        }
+        const userCreated = await userService().createUser(requestObject);
+        if (userCreated) {
+          // Generate the token
+          const jwtObj = {
+            firstName: requestObject.first_name,
+            lastName: requestObject.last_name,
+            id: userCreated.user_id,
+            email: requestObject.email,
+            accessToken: "",
+            refreshToken: "",
+          };
+          const token = await jwtService.issueJwtToken(jwtObj);
+          const refreshToken = await jwtService.issueJwtRefreshToken(jwtObj);
+          jwtObj.accessToken = token;
+          jwtObj.refreshToken = refreshToken;
+          return res.success(
+            CONFIG.SUCCESS_CODE,
+            CONFIG.USER_CREATED_SUCCESSFULLY,
+            jwtObj
+          );
+        } else {
+          res.reject(CONFIG.INTERNAL_SERVER_ERROR, CONFIG.ERROR_WHILE_CREATING_USER)
+        }
+      }
+    } else {
+      res.reject(CONFIG.ERROR_CODE_BAD_REQUEST, CONFIG.INVALID_TOKEN)
+    }
   },
 
 
@@ -155,7 +208,6 @@ const authController = {
   async sendResetPasswordEmail(req, res) {
     try {
       const { email } = req.body;
-      console.log(email);
       const userExist = await userService().getUserByEmail(email);
       if (userExist) {
         try {
@@ -182,7 +234,7 @@ const authController = {
             );
           }
         } catch (error) {
-          console.log("DFDFD", error);
+          return res.reject(error.code, error.message)
         }
       } else {
         return res.reject(CONFIG.SUCCESS_CODE, CONFIG.USER_NOT_FOUND);
@@ -194,10 +246,8 @@ const authController = {
   async forgotPassword(req, res) {
     try {
       const { token, password } = req.body;
-      console.log(token, password);
       const tokenValie = await jwtService.verifyJwtToken(token);
       if (tokenValie) {
-        console.log(tokenValie);
         const userExist = await userService().getUserByEmail(tokenValie.email);
         if (userExist) {
           const hashedPassword = await BycrpytService.generatePassword(
@@ -232,7 +282,6 @@ const authController = {
     const { token } = req.body;
     try {
       const isTokenValid = await jwtService.verifyJwtRefreshToken(token);
-      console.log(isTokenValid);
       const obj = {
         firstName: isTokenValid.firstName,
         lastName: isTokenValid.lastName,

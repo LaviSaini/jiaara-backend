@@ -13,6 +13,9 @@ module.exports = {
     },
     async verifyJwtRefreshToken(token, cb) {
         return jwt.verify(token, process.env.JWT_REFRESH_TOKEN_SECRET, cb);
+    },
+    async decodeToken(token) {
+        return jwt.decode(token)
     }
 
 }

@@ -26,4 +26,3 @@ fs.writeFileSync(apidocJsonPath, JSON.stringify(apidocConfig, null, 2), 'utf8');
 // Run the apidoc command
 execSync('apidoc -i "../ecom-web-app/server/v1/controller" -o "./apidoc/doc"', { stdio: 'inherit' });
 
-console.log(`Documentation generated with version ${newVersion}`);

@@ -21,7 +21,7 @@ exports.verifyPayment = async (req, res) => {
     try {
         const isVerified = await paymentService.verifyPayment(amount, paymentId, currency);
         if (isVerified?.status == 'captured') {
-            await paymentService.updatePaymentStatus(orderId, 'SUCCESSFUl')
+            await paymentService.updatePaymentStatus(orderId, 'SUCCESSFUL')
             res.success(CONFIG.SUCCESS_CODE, CONFIG.PAYMENT_VERIFIED)
         } else if (isVerified?.status == 'failed') {
             await paymentService.updatePaymentStatus(orderId, 'FAILED')
@@ -34,19 +34,17 @@ exports.verifyPayment = async (req, res) => {
     }
 }
 exports.refundPayment = async (req, res) => {
-    const { paymentId } = req.body;
+    const { paymentId, amount } = req.body;
 
     try {
-        const refund = await paymentService.refundPayment(paymentId);
-        refund.then((result) => {
-            if (result?.status == 'failed') {
-                res.reject(CONFIG.INTERNAL_SERVER_ERROR, CONFIG.REFUND_FAILED)
-            } else if (result?.status == 'processed') {
-                res.success(CONFIG.SUCCESS_CODE, CONFIG.REFUND_INITIATED)
-            } else if (result?.status == 'pending') {
-                res.success(CONFIG.SUCCESS_CODE, CONFIG.REFUND_IS_IN_PROGRESS)
-            }
-        })
+        const refund = await paymentService.refundPayment(paymentId, amount);
+        if (refund?.status == 'failed') {
+            res.reject(CONFIG.INTERNAL_SERVER_ERROR, CONFIG.REFUND_FAILED)
+        } else if (refund?.status == 'processed') {
+            res.success(CONFIG.SUCCESS_CODE, CONFIG.REFUND_INITIATED)
+        } else if (refund?.status == 'pending') {
+            res.success(CONFIG.SUCCESS_CODE, CONFIG.REFUND_IS_IN_PROGRESS)
+        }
     } catch (error) {
         res.reject(error.statusCode, error?.error?.description)
     }

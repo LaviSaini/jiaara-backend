@@ -24,16 +24,19 @@ const paymentService = {
         }
     },
     async verifyPayment(amount, paymentId, currency) {
-        return await razorpay.payments.capture(paymentId, amount, currency)
+        return await razorpay.payments.capture(paymentId, amount * 100, currency)
     },
     async updatePaymentStatus(orderId, status) {
         return await paymentModel.update({ status: status }, { where: { order_id: orderId } })
     },
-    async refundPayment(paymentId) {
+    async refundPayment(paymentId, amount) {
         const options = {
             payment_id: paymentId,
         };
-        return await razorpay.payments.refund(options);
+
+        return await razorpay.payments.refund(paymentId, {
+            amount: amount * 100
+        });
     }
 };
 

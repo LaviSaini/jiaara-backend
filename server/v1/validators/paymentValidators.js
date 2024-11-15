@@ -13,7 +13,8 @@ const verifyPayment = Joi.object({
     orderId: Joi.number().required()
 })
 const refundPayment = Joi.object({
-    paymentId: Joi.string().required()
+    paymentId: Joi.string().required(),
+    amount: Joi.number().required()
 })
 module.exports = {
     createOrder: (req, res, next) => {

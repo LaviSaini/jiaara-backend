@@ -5,7 +5,6 @@ const userService = () => {
         return await UserModel.findOne({ where: { email: email } })
     }
     const createUser = async (data) => {
-        console.log('data', data)
         return await UserModel.create(data);
     }
     const updateUserPassword = async (password, email) => {

@@ -26,7 +26,7 @@ const generateNewAccessToken = Joi.object({
     token: Joi.string().required()
 })
 const customGoogleLogin = Joi.object({
-    googleToken: Joi.string().required()
+    token: Joi.string().required()
 })
 module.exports = {
     userSignUp: (req, res, next) => {

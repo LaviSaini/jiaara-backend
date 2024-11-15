@@ -26,6 +26,9 @@ const cartService = {
     },
     async deleteItem(userId, productId) {
         return await cartModel.destroy({ where: { user_id: userId, product_id: productId } })
+    },
+    async getItemList(userId) {
+        return await cartModel.findAll({ where: { user_id: userId } })
     }
 };
 
