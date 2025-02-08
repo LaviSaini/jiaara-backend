@@ -19,7 +19,7 @@ const sendResetPasswordMail = Joi.object({
     email: Joi.string().required()
 })
 const forgotPassword = Joi.object({
-    token: Joi.string().required(),
+    email: Joi.string().required(),
     password: Joi.string().required()
 })
 const generateNewAccessToken = Joi.object({

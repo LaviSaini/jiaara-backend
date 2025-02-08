@@ -9,4 +9,5 @@ router.post('/send-reset-password-mail', sendResetPasswordMail, AuthController.s
 router.post('/forget-password', forgotPassword, AuthController.forgotPassword)
 router.post('/generate-new-access-token', generateNewAccessToken, AuthController.generateNewAccessToken)
 router.post('/google-login', customGoogleLogin, AuthController.customGoogleLogin)
+router.post('/verify-otp', AuthController.verifyOtp)
 module.exports = router

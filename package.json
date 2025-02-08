@@ -25,7 +25,8 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "path": "^0.12.7",
+    "php-serialize": "^5.0.1",
     "razorpay": "^2.9.5",
-    "sequelize": "^6.37.4"
+    "sequelize": "^6.37.5"
   }
 }

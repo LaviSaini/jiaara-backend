@@ -6,11 +6,14 @@ const BycrpytService = require("../service/bycrpty.service");
 const jwtService = require("../service/jwt.service");
 const sendEmail = require("../../utils/nodemailer");
 const jwt = require("jsonwebtoken");
-const generateCustomPassword = require('../../utils/passwordGenerator')
+const generateCustomPassword = require('../../utils/passwordGenerator');
+const randomNumberGenerator = require("../../utils/randomNumberGenerator");
+const serialize = require('php-serialize');
 const authController = {
   async signUp(req, res) {
     try {
       const { first_name, last_name, email, password } = req.body;
+      console.log("HELLO")
       const userCheck = await userService().getUserByEmail(email);
       if (userCheck) {
         return res.reject(CONFIG.SUCCESS_CODE, CONFIG.EMAIL_ALREADY_EXISTS);
@@ -18,18 +21,41 @@ const authController = {
       const hashedPassword = await BycrpytService.generatePassword(password);
       if (hashedPassword) {
         const requestObject = {
-          first_name: first_name,
-          last_name: last_name,
-          email: email,
-          password: hashedPassword,
+          user_nicename: first_name + ' ' + last_name,
+          display_name: first_name + ' ' + last_name,
+          user_email: email,
+          user_pass: hashedPassword,
+          user_login: first_name + ' ' + last_name,
+          user_url: 'j8',
+          user_activation_key: 'i',
+          user_login: first_name + ' ' + last_name
         };
+        console.log(requestObject)
         const userCreated = await userService().createUser(requestObject);
+        // console.log("user", userCreated)
         if (userCreated) {
           // Generate the token
+          const data = {
+            customer: true
+          };
+
+          // Convert to PHP serialized format
+          const role = serialize.serialize(data);
+          const userMetaData = [
+            { user_id: userCreated.ID, meta_key: 'nickname', meta_value: first_name + ' ' + last_name },
+            { user_id: userCreated.ID, meta_key: 'first_name', meta_value: first_name },
+            { user_id: userCreated.ID, meta_key: 'last_name', meta_value: last_name },
+            { user_id: userCreated.ID, meta_key: 'description', meta_value: "" },
+            { user_id: userCreated.ID, meta_key: 'tqio_capabilities', meta_value: role },
+          ]
+          for (const data of userMetaData) {
+            await userService().saveMetaDataa(data);
+          }
+          console.log('usermeta', userMetaData)
           const jwtObj = {
-            firstName: first_name,
-            lastName: last_name,
-            id: userCreated.user_id,
+            firstName: userCreated?.display_name.split(' ')[0],
+            lastName: userCreated?.display_name.split(' ')[1],
+            id: userCreated.ID,
             email: email,
             accessToken: "",
             refreshToken: "",
@@ -56,7 +82,7 @@ const authController = {
         );
       }
     } catch (error) {
-      return res.reject(error.code, error.message);
+      return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message);
     }
   },
   async customGoogleLogin(req, res) {
@@ -130,7 +156,14 @@ const authController = {
  * @apiDescription User Service...
 
  */
-
+  // user_nicename: first_name + ' ' + last_name,
+  // display_name: first_name + ' ' + last_name,
+  // user_email: email,
+  // user_pass: hashedPassword,
+  // user_login: first_name + ' ' + last_name,
+  // user_url: 'j8',
+  // user_activation_key: 'i',
+  // user_login: first_name + ' ' + last_name
   async login(req, res) {
     try {
       const { email, password } = req.body;
@@ -138,20 +171,21 @@ const authController = {
       if (userExist) {
         const verifyPassword = await BycrpytService.comparePassword(
           password,
-          userExist.password
+          userExist.user_pass
         );
         if (verifyPassword) {
           const obj = {
-            firstName: userExist.first_name,
-            lastName: userExist.last_name,
-            id: userExist.user_id,
-            email: userExist.email,
+            firstName: userExist.display_name.split(" ")[0],
+            lastName: userExist.display_name.split(" ")[1],
+            id: userExist.ID,
+            email: userExist.user_email,
           };
           const jwtToken = await jwtService.issueJwtToken(obj);
           const refreshToken = await jwtService.issueJwtRefreshToken(obj);
 
           return res.success(CONFIG.SUCCESS_CODE, CONFIG.USER_FOUND, {
             token: jwtToken,
+            id: userExist.ID,
             refreshToken: refreshToken,
           });
         } else {
@@ -161,6 +195,7 @@ const authController = {
         return res.reject(CONFIG.SUCCESS_CODE, CONFIG.USER_NOT_FOUND);
       }
     } catch (error) {
+      console.log(error)
       return res.reject(error.code, error.message);
     }
   },
@@ -211,19 +246,15 @@ const authController = {
       const userExist = await userService().getUserByEmail(email);
       if (userExist) {
         try {
-          const obj = {
-            email: userExist.email,
-            first_name: userExist.first_name,
-            last_name: userExist.last_name,
-          };
-          const token = await jwtService.issueJwtToken(obj);
+          const otp = randomNumberGenerator();
+          const otpSaved = await userService().saveotp(otp, email);
           const mailSent = await sendEmail(
-            "prafulkumarrajput14@gmail.com",
+            email,
             "Reset Password",
-            token
+            `<div>${otp}</div>`
           );
           if (mailSent) {
-            return res.reject(
+            return res.success(
               CONFIG.SUCCESS_CODE,
               CONFIG.RESET_PASSWORD_MAIL_SENT_SUCCESSFULLY
             );
@@ -234,45 +265,44 @@ const authController = {
             );
           }
         } catch (error) {
-          return res.reject(error.code, error.message)
+          return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message)
         }
       } else {
         return res.reject(CONFIG.SUCCESS_CODE, CONFIG.USER_NOT_FOUND);
       }
     } catch (error) {
-      return res.reject(error.code, error.message);
+      return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message);
     }
   },
   async forgotPassword(req, res) {
     try {
-      const { token, password } = req.body;
-      const tokenValie = await jwtService.verifyJwtToken(token);
-      if (tokenValie) {
-        const userExist = await userService().getUserByEmail(tokenValie.email);
-        if (userExist) {
-          const hashedPassword = await BycrpytService.generatePassword(
-            password
+      const { password, email } = req.body;
+      const userExist = await userService().getUserByEmail(email);
+
+      if (userExist) {
+
+        const hashedPassword = await BycrpytService.generatePassword(
+          password
+        );
+        const passwordUpdated = await userService().updateUserPassword(
+          hashedPassword,
+          email
+        );
+        if (passwordUpdated) {
+          return res.success(
+            CONFIG.SUCCESS_CODE,
+            CONFIG.PASSWORD_SAVED_SUCCESSFULLY
           );
-          const passwordUpdated = await userService().updateUserPassword(
-            hashedPassword,
-            tokenValie.email
-          );
-          if (passwordUpdated) {
-            return res.success(
-              CONFIG.SUCCESS_CODE,
-              CONFIG.PASSWORD_SAVED_SUCCESSFULLY
-            );
-          } else {
-            return res.reject(
-              CONFIG.SUCCESS_CODE,
-              CONFIG.ERROR_WHILE_SAVING_THE_PASSWORD
-            );
-          }
         } else {
-          return res.reject(CONFIG.SUCCESS_CODE, CONFIG.USER_NOT_FOUND);
+          return res.reject(
+            CONFIG.SUCCESS_CODE,
+            CONFIG.ERROR_WHILE_SAVING_THE_PASSWORD
+          );
         }
+
       } else {
-        return res.reject(CONFIG.SUCCESS_CODE, CONFIG.INVALID_TOKEN);
+        return res.reject(CONFIG.SUCCESS_CODE, CONFIG.USER_NOT_FOUND);
+
       }
     } catch (error) {
       return res.reject(error.code, error.message);
@@ -298,6 +328,20 @@ const authController = {
       }
     }
   },
+  async verifyOtp(req, res) {
+    const { email, otp } = req.body;
+    const userExist = await userService().getUserByEmail(email);
+    if (userExist) {
+      console.log(otp, userExist)
+      if (otp != userExist.otp) {
+        return res.reject(CONFIG.SUCCESS_CODE, CONFIG.OTP_IS_INCORRECT)
+      } else if (otp === userExist.otp) {
+        return res.success(CONFIG.SUCCESS_CODE, CONFIG.OTP_VERIFIED)
+      }
+    } else {
+      return res.reject(CONFIG.SUCCESS_CODE, CONFIG.USER_NOT_FOUND);
+    }
+  }
 };
 
 module.exports = authController;

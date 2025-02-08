@@ -3,7 +3,10 @@ const CONFIG = require("../../utils/appConfig");
 const addItem = Joi.object({
     userId: Joi.number().required(),
     productId: Joi.number().required(),
-    quantity: Joi.number().required()
+    quantity: Joi.number().required(),
+    img: Joi.string().required(),
+    name: Joi.string().required(),
+    price: Joi.number().required()
 });
 const deleteItem = Joi.object({
     userId: Joi.number().required(),

@@ -1,5 +1,5 @@
 module.exports = function (sequelize, DataTypes) {
-    const users = sequelize.define('carts', {
+    const cart = sequelize.define('cart', {
         user_id: {
             type: DataTypes.INTEGER(11),
             allowNull: false
@@ -23,6 +23,18 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.INTEGER(11),
             allowNull: false
         },
+        img: {
+            type: DataTypes.STRING(100),
+            allowNull: false
+        },
+        price: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false
+        },
+        name: {
+            type: DataTypes.STRING(100),
+            allowNull: false
+        },
         status: {
             type: DataTypes.STRING(100),
             allowNull: false,
@@ -30,11 +42,11 @@ module.exports = function (sequelize, DataTypes) {
         }
     }, {
         timestamps: false,
-        tableName: 'carts',
+        tableName: 'cart',
     });
-    users.prototype.toJSON = function () {
+    cart.prototype.toJSON = function () {
         const values = Object.assign({}, this.get());
         return values;
     };
-    return users;
+    return cart;
 }

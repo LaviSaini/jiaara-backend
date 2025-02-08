@@ -6,9 +6,17 @@ module.exports = function (sequelize, DataTypes) {
             primaryKey: true,
             autoIncrement: true
         },
-        order_id: {
-            type: DataTypes.INTEGER(11),
+        product_id: {
+            type: DataTypes.JSON,
             allowNull: false,
+        },
+        userId: {
+            type: DataTypes.INTEGER(11),
+            allowNull: false
+        },
+        order_id: {
+            type: DataTypes.STRING(1000),
+            allowNull: true
         },
         payment_date: {
             type: DataTypes.DATE,
@@ -18,7 +26,7 @@ module.exports = function (sequelize, DataTypes) {
         payment_method: {
             type: DataTypes.STRING(100),
             allowNull: false,
-            defaultValue: "Cash on Delivery"
+            defaultValue: "Razorpay"
         },
         payment_amount: {
             type: DataTypes.INTEGER(11),

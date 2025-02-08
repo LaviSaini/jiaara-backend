@@ -18,6 +18,7 @@ const sendEmail = async (email, subject, html) => {
         subject: subject,
         html: html,
     });
+
     if (response.accepted) {
         if (response.accepted.length > 0) {
             return true;

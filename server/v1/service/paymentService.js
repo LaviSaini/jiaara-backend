@@ -3,7 +3,7 @@ const Models = require('../models')
 const paymentModel = Models.payments
 
 const paymentService = {
-    async createOrder(amount, currency, userId, orderId) {
+    async createOrder(amount, currency, userId, productId) {
         const options = {
             amount: amount * 100, // Convert amount to smallest currency unit
             currency: currency || 'INR',
@@ -14,8 +14,9 @@ const paymentService = {
         // Create order in Razorpay
         const order = await razorpay.orders.create(options);
         const obj = {
-            order_id: orderId,
+            product_id: productId,
             payment_amount: amount,
+            userId: userId
         }
 
         return {
@@ -27,7 +28,7 @@ const paymentService = {
         return await razorpay.payments.capture(paymentId, amount * 100, currency)
     },
     async updatePaymentStatus(orderId, status) {
-        return await paymentModel.update({ status: status }, { where: { order_id: orderId } })
+        return await paymentModel.update({ status: status }, { where: { payment_id: orderId } })
     },
     async refundPayment(paymentId, amount) {
         const options = {
