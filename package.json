@@ -9,6 +9,9 @@
   },
   "author": "",
   "license": "ISC",
+  "peerDependencies": {
+    "mysql2": "^3.6.0"
+  },
   "dependencies": {
     "apidoc": "^1.2.0",
     "bcrypt": "^5.1.1",
