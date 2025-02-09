@@ -38,11 +38,7 @@ app.use(function (req, res, next) {
     );
     next();
 });
-const corsOption = {
-    origin: ['http://localhost:3000'],
-    credentials: true
-}
-app.use(cors(corsOption));
+app.options("*", cors(corsOptions));
 
 app.use(response.success, response.reject);
 app.use(express.json({ limit: "500mb" }));
