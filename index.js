@@ -46,7 +46,7 @@ app.use(response.success, response.reject);
 app.use("/api/v1", v1);
 
 // Server Listener
-const PORT = process.env.SERVER || 5000;
+const PORT = process.env.SERVER || 9122;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
