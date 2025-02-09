@@ -1,6 +1,6 @@
 const express = require("express");
 const path = require("path");
-const https = require('https');
+const http = require('http');
 const cors = require("cors");
 require("dotenv").config();
 const response = require('./responses/index')
@@ -11,7 +11,7 @@ const dbService = require("./v1/service/db.service")
 app.use('/apidoc', express.static(path.join(__dirname, '../apidoc/doc')));
 const DB = dbService('development', config.migrate).start();
 require('./connection/connect')
-let server = https.createServer(app, function (req, res) {
+let server = http.createServer(app, function (req, res) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end();
 })
