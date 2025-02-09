@@ -11,17 +11,19 @@ const dbService = require("./server/v1/service/db.service")
 app.use('/apidoc', express.static(path.join(__dirname, '../apidoc/doc')));
 const DB = dbService('development', config.migrate).start();
 require('./server/connection/connect')
-let server = http.createServer(app, function (req, res) {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end();
-})
-    .listen(process.env.SERVER, (err) => {
-        if (err) {
-            return console.log("something went wrongG!", err)
-        }
-        console.log(`server is runnig at ${process.env.SERVER}`)
-    })
-
+// let server = http.createServer(app, function (req, res) {
+//     res.writeHead(200, { 'Content-Type': 'application/json' });
+//     res.end();
+// })
+//     .listen(process.env.SERVER, (err) => {
+//         if (err) {
+//             return console.log("something went wrongG!", err)
+//         }
+//         console.log(`server is runnig at ${process.env.SERVER}`)
+//     })
+app.listen(process.env.SERVER, () => {
+    console.log(`Server running on port ${process.env.SERVER}`);
+});
 app.use(function (req, res, next) {
     if (req.headers.origin) {
         res.setHeader("Access-Control-Allow-Origin", req.headers.origin);
