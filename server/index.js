@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const http = require('http');
+const cors = require("cors");
 require("dotenv").config();
 const response = require('./responses/index')
 const v1 = require('./v1/routes')
@@ -37,7 +38,20 @@ app.use(function (req, res, next) {
     );
     next();
 });
+const allowedOrigins = ["https://jiaara-backend-dmq2.vercel.app/"];
 
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+}));
 app.use(response.success, response.reject);
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: false }));
