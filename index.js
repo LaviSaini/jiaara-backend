@@ -1,52 +1,52 @@
 const express = require("express");
 const path = require("path");
-const http = require('http');
 const cors = require("cors");
 require("dotenv").config();
-const response = require('./server/responses/index')
-const v1 = require('./server/v1/routes')
-var app = express();
-const config = require('./server/config');
-const dbService = require("./server/v1/service/db.service")
-app.use('/apidoc', express.static(path.join(__dirname, '../apidoc/doc')));
-const DB = dbService('development', config.migrate).start();
-require('./server/connection/connect')
-// let server = http.createServer(app, function (req, res) {
-//     res.writeHead(200, { 'Content-Type': 'application/json' });
-//     res.end();
-// })
-//     .listen(process.env.SERVER, (err) => {
-//         if (err) {
-//             return console.log("something went wrongG!", err)
-//         }
-//         console.log(`server is runnig at ${process.env.SERVER}`)
-//     })
-app.listen(process.env.SERVER, () => {
-    console.log(`Server running on port ${process.env.SERVER}`);
-});
-app.use(function (req, res, next) {
-    if (req.headers.origin) {
-        res.setHeader("Access-Control-Allow-Origin", req.headers.origin);
-    } else {
-        res.setHeader("Access-Control-Allow-Origin", "*");
-    }
-    res.setHeader(
-        "Access-Control-Allow-Methods",
-        "HEAD, GET, POST, PUT, PATCH, DELETE"
-    );
-    res.setHeader(
-        "Access-Control-Allow-Headers",
-        "X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method,Access-Control-Request-Headers, Authorization, authorization,appstats"
-    );
-    next();
-});
-const corsOption = {
-    origin: ['http://localhost:3000'],
-    credentials: true
-}
-app.options("*", cors(corsOption));
 
-app.use(response.success, response.reject);
+const response = require("./server/responses/index");
+const v1 = require("./server/v1/routes");
+const config = require("./server/config");
+const dbService = require("./server/v1/service/db.service");
+
+// Initialize Express App
+const app = express();
+
+// Start Database Service
+const DB = dbService("development", config.migrate).start();
+require("./server/connection/connect");
+
+// Middleware: CORS
+const corsOptions = {
+    origin: "*", // Allow all origins
+    credentials: true,
+    methods: ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: [
+        "X-API-KEY",
+        "Origin",
+        "X-Requested-With",
+        "Content-Type",
+        "Accept",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
+        "Authorization",
+        "authorization",
+        "appstats",
+    ],
+};
+app.use(cors(corsOptions));
+
+// Middleware: JSON and URL Encoded Parsing
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: false }));
-app.use('/api/v1', v1)
+
+// Middleware: Custom Response Handlers
+app.use(response.success, response.reject);
+
+// Routes
+app.use("/api/v1", v1);
+
+// Server Listener
+const PORT = process.env.SERVER || 5000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});
