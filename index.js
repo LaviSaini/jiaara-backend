@@ -47,6 +47,6 @@ app.use("/api/v1", v1);
 
 // Server Listener
 const PORT = process.env.SERVER || 9122;
-app.listen(PORT, () => {
+app.listen(PORT,'0.0.0.0',() => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
