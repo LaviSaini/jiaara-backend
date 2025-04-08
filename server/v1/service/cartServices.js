@@ -1,6 +1,8 @@
 const Models = require('../models')
 const cartModel = Models.carts
 const paymentModel = Models.payments;
+const postMeta = Models.tqio_postmeta;
+const { Op } = require('sequelize');
 const cartService = {
     async addItem(userId, productId, quantity, img, price, name) {
         //finding item already exist for it or not
@@ -36,6 +38,9 @@ const cartService = {
     },
     async clearCart(userId) {
         return await cartModel.destroy({ where: { user_id: userId } })
+    },
+    async getMetaData(postId) {
+        return await postMeta.findAll({ where: { post_id: { [Op.in]: postId } } })
     }
 };
 

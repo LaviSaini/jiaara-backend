@@ -8,7 +8,7 @@ exports.addItem = async (req, res) => {
         await cartService.addItem(userId, productId, quantity, img, price, name);
         return res.success(CONFIG.SUCCESS_CODE, CONFIG.ITEM_ADDED_TO_CART)
     } catch (error) {
-        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message)
+        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -16,13 +16,33 @@ exports.addItem = async (req, res) => {
 exports.getCartList = async (req, res) => {
     const { userId } = req.params;
     try {
-        const list = await cartService.getItemList(userId);
-        if (list.length === 0) {
+        let list = await cartService.getItemList(userId);
+        const allProductIds = list.map(data => data.product_id);
+        const productMeta = await cartService.getMetaData(allProductIds);
+        const newList = list.map((element) => {
+            const inStockDetail = productMeta.find(data => data.post_id === element.product_id && data.meta_key == '_stock_status');
+            const obj = {
+                "user_id": element?.user_id,
+                "cart_id": element?.cart_id,
+                "created_date": element?.created_date,
+                "product_id": element?.product_id,
+                "quantity": element?.quantity,
+                "img": element?.img,
+                "price": element?.price,
+                "name": element?.name,
+                "status": element?.status,
+                // "inStock": false
+                "inStock": inStockDetail.meta_value == 'instock' ? true : false
+            }
+            return obj;
+        })
+        // return res.success(CONFIG.SUCCESS_CODE, CONFIG.CART_LIST, newList)
+        if (newList.length === 0) {
             return res.success(CONFIG.SUCCESS_CODE, CONFIG.ITEM_NOT_FOUND_IN_CART, [])
         }
-        return res.success(CONFIG.SUCCESS_CODE, CONFIG.CART_LIST, list)
+        return res.success(CONFIG.SUCCESS_CODE, CONFIG.CART_LIST, newList)
     } catch (error) {
-        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message)
+        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -43,9 +63,24 @@ exports.deleteItem = async (req, res) => {
             return res.success(CONFIG.SUCCESS_CODE, CONFIG.ITEM_NOT_FOUND_IN_CART)
         }
     } catch (error) {
-        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message);
+        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
 };
+
+exports.clearCart = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const cartClear = await cartService.clearCart(userId);
+        if (cartClear) {
+            return res.success(CONFIG.SUCCESS_CODE, {})
+        } else {
+            return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR)
+
+        }
+    } catch (error) {
+        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR,)
+    }
+}
 exports.finalOrder = async (req, res) => {
     const { userId, orderId, customPaymentId } = req.body;
     try {
@@ -62,6 +97,6 @@ exports.finalOrder = async (req, res) => {
             return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR)
         }
     } catch (error) {
-        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message)
+        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
 }

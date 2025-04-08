@@ -7,5 +7,6 @@ const { addItem, deleteItem } = require('../validators/cartValidations');
 router.post('/add-cart', addItem, cartController.addItem);    // Add item to cart
 router.get('/get-cart-list/:userId', cartController.getCartList) //get cart items
 router.post('/delete-item', deleteItem, cartController.deleteItem); // Delete item from cart
-router.post('/final-order', cartController.finalOrder)
+router.post('/final-order', cartController.finalOrder);
+router.delete('/clear-cart/:userId', cartController.clearCart);
 module.exports = router;

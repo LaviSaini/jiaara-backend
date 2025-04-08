@@ -82,7 +82,7 @@ const authController = {
         );
       }
     } catch (error) {
-      return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message);
+      return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
   },
   async customGoogleLogin(req, res) {
@@ -195,8 +195,7 @@ const authController = {
         return res.reject(CONFIG.SUCCESS_CODE, CONFIG.USER_NOT_FOUND);
       }
     } catch (error) {
-      console.log(error)
-      return res.reject(error.code, error.message);
+      return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
   },
   async resetPassword(req, res) {
@@ -237,7 +236,7 @@ const authController = {
         return res.reject(CONFIG.SUCCESS_CODE, CONFIG.USER_NOT_FOUND);
       }
     } catch (error) {
-      return res.status(error.code, error.message);
+      return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
   },
   async sendResetPasswordEmail(req, res) {
@@ -271,7 +270,7 @@ const authController = {
         return res.reject(CONFIG.SUCCESS_CODE, CONFIG.USER_NOT_FOUND);
       }
     } catch (error) {
-      return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message);
+      return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
   },
   async forgotPassword(req, res) {
@@ -305,7 +304,7 @@ const authController = {
 
       }
     } catch (error) {
-      return res.reject(error.code, error.message);
+      return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
   },
   async generateNewAccessToken(req, res) {

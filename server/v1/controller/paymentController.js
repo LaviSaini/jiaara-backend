@@ -16,11 +16,11 @@ exports.createOrder = async (req, res) => {
             res.reject(CONFIG.INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR)
         }
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
 };
 exports.verifyPayment = async (req, res) => {
-    const { amount, payment_order_Id, currency,customPaymentId } = req.body;
+    const { amount, payment_order_Id, currency, customPaymentId } = req.body;
     try {
         const isVerified = await paymentService.verifyPayment(amount, payment_order_Id, currency);
         if (isVerified?.status == 'captured') {
@@ -33,7 +33,7 @@ exports.verifyPayment = async (req, res) => {
             res.reject(isVerified?.error_code, isVerified?.error_description)
         }
     } catch (error) {
-        res.reject(error?.statusCode, error?.error?.description)
+        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
 }
 exports.refundPayment = async (req, res) => {
@@ -49,7 +49,7 @@ exports.refundPayment = async (req, res) => {
             res.success(CONFIG.SUCCESS_CODE, CONFIG.REFUND_IS_IN_PROGRESS)
         }
     } catch (error) {
-        res.reject(error.statusCode, error?.error?.description)
+        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
 };
 exports.contactUs = async (req, res) => {
@@ -64,6 +64,6 @@ exports.contactUs = async (req, res) => {
         }
 
     } catch (error) {
-        res.reject(error.statusCode, error?.error?.description);
+        return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
 }
