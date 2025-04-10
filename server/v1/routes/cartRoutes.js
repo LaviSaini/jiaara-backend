@@ -9,4 +9,5 @@ router.get('/get-cart-list/:userId', cartController.getCartList) //get cart item
 router.post('/delete-item', deleteItem, cartController.deleteItem); // Delete item from cart
 router.post('/final-order', cartController.finalOrder);
 router.delete('/clear-cart/:userId', cartController.clearCart);
+router.get('/get-order-details/:orderId', cartController.getOrderDetails)
 module.exports = router;
