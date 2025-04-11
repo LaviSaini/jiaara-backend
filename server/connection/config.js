@@ -8,11 +8,10 @@ module.exports = {
         dialect: process.env.DBDIALECT || '',
     },
     "development": {
-        db_host: process.env.DEV_DB_HOST,
+        db_host: process.env.DB_HOST,
         user: process.env.DB_USER || '',
-        password: process.env.DEV_PASSWORD || '',
+        password: process.env.PASSWORD || '',
         database: process.env.DB || '',
         db_port: process.env.DBPORT || '',
-        dialect: process.env.DBDIALECT || '',
-    }
+        dialect: process.env.DBDIALECT || '',    }
 }

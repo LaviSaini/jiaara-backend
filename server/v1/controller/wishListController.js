@@ -24,7 +24,7 @@ const wishListController = {
             }
             return res.success(CONFIG.SUCCESS_CODE, CONFIG.WISH_LIST, list)
         } catch (error) {
-            return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message)
+            return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
         }
     },
     async deleteWishListItem(req, res) {
@@ -43,7 +43,7 @@ const wishListController = {
                 return res.success(CONFIG.SUCCESS_CODE, CONFIG.ITEM_NOT_FOUND_IN_WISHLIST)
             }
         } catch (error) {
-            return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, error.message);
+            return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
         }
     },
     async deleteAllWishlist(req, res) {

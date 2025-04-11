@@ -37,6 +37,7 @@ module.exports = {
         next()
     },
     userLogin: (req, res, next) => {
+        console.log("reached 1")
         const { error } = userLogin.validate(req.body);
         if (error) {
             return res.status(CONFIG.ERROR_CODE_BAD_REQUEST).json({ message: error.details[0].message })

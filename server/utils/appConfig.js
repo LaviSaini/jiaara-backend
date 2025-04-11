@@ -52,7 +52,8 @@ let appConfig = {
     ITEM_ADDED_TO_WISHLIST: 'Item Added to wishlist successfully',
     ALL_ITEM_DELETED: 'All Item Deleted',
     OTP_IS_INCORRECT: 'Wrong OTP!',
-    OTP_VERIFIED: 'OTP verified.'
+    OTP_VERIFIED: 'OTP verified.',
+    SUCCESS: "SUCCESS"
 };
 
 module.exports = appConfig;

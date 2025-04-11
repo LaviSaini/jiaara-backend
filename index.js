@@ -41,12 +41,12 @@ app.use(express.urlencoded({ limit: "500mb", extended: false }));
 
 // Middleware: Custom Response Handlers
 app.use(response.success, response.reject);
-
+console.log("reached")
 // Routes
 app.use("/api/v1", v1);
 
 // Server Listener
-const PORT = process.env.SERVER || 9122;
+const PORT = process.env.SERVER || 9123;
 app.listen(PORT,'0.0.0.0',() => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
