@@ -135,13 +135,21 @@ exports.getOrderDetails = async (req, res) => {
         const productDetail = await orderService.getPostData(productIds);
         const productMetaDetail = await orderService.getPostMetaData(productIds);
         const thumbnailIds = productMetaDetail.filter(data => data.meta_key == '_thumbnail_id');
-        const salesPrice = productMetaDetail.filter(data => data.meta_key == '_sale_price');
+        const salesPrice = productMetaDetail.filter(data => data.meta_key == '_sale_price' || data.meta_key == '_regular_price');
         const thumbnailDetails = await orderService.getPostData(thumbnailIds.map(element => element.meta_value));
         let arr = [];
         productDetail.forEach((element) => {
             const thumbailId = thumbnailIds.find(data => data.post_id == element.ID)?.meta_value;
             const quantity = productLookUpDetail.find(data => data.product_id == element.ID)?.product_qty;
-            const price = salesPrice.find(data => data.post_id == element.ID)?.meta_value;
+            const priceList = salesPrice.filter(data => data.post_id == element.ID);
+            let price = 0;
+            let data = priceList.find(data => data.meta_key == '_sale_price');
+            if (data) {
+                price = data.meta_value
+            } else {
+                price = priceList[0].meta_value
+            }
+            console.log(price)
             let obj = {
                 id: element.ID,
                 title: element.post_title,
