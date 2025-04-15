@@ -130,8 +130,8 @@ exports.getOrderDetails = async (req, res) => {
             billingAddress: addObj
         }
         resObj.customerDetails = obj2;
-        // const productLookUpDetail = await orderService.getProductLookUpData(orderId);
-        const productLookUpDetail = await getValidProductLookUp(orderId);
+        const productLookUpDetail = await orderService.getProductLookUpData(orderId);
+        // const productLookUpDetail = await getValidProductLookUp(orderId);
         // if(productLookUpDetail.length==0){
 
         // }
