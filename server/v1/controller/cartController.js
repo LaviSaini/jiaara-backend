@@ -130,7 +130,11 @@ exports.getOrderDetails = async (req, res) => {
             billingAddress: addObj
         }
         resObj.customerDetails = obj2;
-        const productLookUpDetail = await orderService.getProductLookUpData(orderId);
+        // const productLookUpDetail = await orderService.getProductLookUpData(orderId);
+        const productLookUpDetail = await getValidProductLookUp(orderId);
+        // if(productLookUpDetail.length==0){
+
+        // }
         const productIds = productLookUpDetail.map(element => element.product_id);
         const productDetail = await orderService.getPostData(productIds);
         const productMetaDetail = await orderService.getPostMetaData(productIds);
@@ -168,4 +172,28 @@ exports.getOrderDetails = async (req, res) => {
         console.log(error)
         return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR)
     }
+}
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function getValidProductLookUp(orderId, maxRetries = 5, delayMs = 1000) {
+    let retries = 0;
+    let productLookUpDetail = [];
+
+    while (productLookUpDetail.length === 0 && retries < maxRetries) {
+        productLookUpDetail = await getProductLookUpdate(orderId);
+
+        if (productLookUpDetail.length === 0) {
+            retries++;
+            console.log(`Retrying... (${retries})`);
+            await delay(delayMs); // wait before next try
+        }
+    }
+
+    return productLookUpDetail;
+}
+async function getProductLookUpdate(orderId) {
+    const productLookUpDetail = await orderService.getProductLookUpData(orderId);
+    return productLookUpDetail
 }
