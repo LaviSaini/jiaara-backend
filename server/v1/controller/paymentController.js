@@ -16,6 +16,7 @@ exports.createOrder = async (req, res) => {
             res.reject(CONFIG.INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR)
         }
     } catch (error) {
+        console.log(error)
         return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR);
     }
 };
