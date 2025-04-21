@@ -34,7 +34,7 @@ const cartService = {
         return await cartModel.findAll({ where: { user_id: userId } })
     },
     async udpateOrderId(orderId, userId, paymentId) {
-        return await paymentModel.update({ order_id: orderId }, { where: { userId: userId, payment_id: paymentId } })
+        return await paymentModel.update({ order_id: orderId }, { where: { payment_id: paymentId } })
     },
     async clearCart(userId) {
         return await cartModel.destroy({ where: { user_id: userId } })

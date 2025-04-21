@@ -87,16 +87,19 @@ exports.clearCart = async (req, res) => {
     }
 }
 exports.finalOrder = async (req, res) => {
-    const { userId, orderId, customPaymentId } = req.body;
+    const { userId, orderId, customPaymentId, isBuyNow } = req.body;
     try {
         const orderIdUpdated = await cartService.udpateOrderId(orderId, userId, customPaymentId)
         if (orderIdUpdated) {
-            const cartClear = await cartService.clearCart(userId);
-            if (cartClear) {
-                return res.success(CONFIG.SUCCESS_CODE, {})
+            if (!isBuyNow) {
+                const cartClear = await cartService.clearCart(userId);
+                if (cartClear) {
+                    return res.success(CONFIG.SUCCESS_CODE, {})
+                } else {
+                    return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR)
+                }
             } else {
-                return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR)
-
+                return res.success(CONFIG.SUCCESS_CODE, {})
             }
         } else {
             return res.reject(CONFIG.ERROR_CODE_INTERNAL_SERVER_ERROR, CONFIG.INTERNAL_SERVER_ERROR)
