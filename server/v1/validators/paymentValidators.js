@@ -3,7 +3,7 @@ const CONFIG = require("../../utils/appConfig")
 const createOrder = Joi.object({
     amount: Joi.number().required(),
     currency: Joi.string().allow(null),
-    userId: Joi.number().required(),
+    userId: Joi.number().allow(null),
     productId: Joi.array().required()
 })
 const verifyPayment = Joi.object({
