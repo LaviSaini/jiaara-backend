@@ -329,12 +329,13 @@ const authController = {
   },
   async verifyOtp(req, res) {
     const { email, otp } = req.body;
-    const userExist = await userService().getUserByEmail(email);
+    const userExist = await userService().getOtpByEmail(email);
     if (userExist) {
       console.log(otp, userExist)
       if (otp != userExist.otp) {
         return res.reject(CONFIG.SUCCESS_CODE, CONFIG.OTP_IS_INCORRECT)
       } else if (otp === userExist.otp) {
+        await userService().removeOtp(email);
         return res.success(CONFIG.SUCCESS_CODE, CONFIG.OTP_VERIFIED)
       }
     } else {
