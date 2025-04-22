@@ -10,7 +10,7 @@ const userService = () => {
         return await UserModel.create(data);
     }
     const updateUserPassword = async (password, email) => {
-        return await UserModel.update({ password: password }, { where: { email: email } })
+        return await UserModel.update({ user_pass: password }, { where: { user_email: email } })
     }
     const saveotp = async (otp, email) => {
         const exists = await OTP.findOne({ where: { email: email } });
