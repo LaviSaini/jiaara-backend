@@ -182,7 +182,12 @@ const authController = {
           };
           const jwtToken = await jwtService.issueJwtToken(obj);
           const refreshToken = await jwtService.issueJwtRefreshToken(obj);
-
+          res.cookie('TOKEN', jwtToken, {
+            httpOnly: true,     // Can't be accessed by JS on the frontend
+            secure: false,      // Set to true if using HTTPS
+            maxAge: 24 * 60 * 60 * 1000,  // 1 day
+            sameSite: 'lax',    // Or 'strict'/'none'
+          })
           return res.success(CONFIG.SUCCESS_CODE, CONFIG.USER_FOUND, {
             token: jwtToken,
             id: userExist.ID,
